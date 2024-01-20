@@ -2,7 +2,7 @@ import datetime
 import time
 
 import telegram
-from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import Update, CallbackQuery
 from telegram.ext import CallbackQueryHandler
@@ -38,12 +38,12 @@ def button_callback(update, context):
     """Handles button callback query"""
     query = update.callback_query
     text = query.data
+    # conn = sqlite3.connect('/etc/x-ui/x-ui.db')
+    conn = sqlite3.connect('C:\\Users\\vbahramian\\Desktop\\x-ui.db')
+    # conn = sqlite3.connect('/home/vahid/x-ui.db')
+    cursor = conn.cursor()
     if text == "account_inquiry":
         global request_count
-        # conn = sqlite3.connect('/etc/x-ui/x-ui.db')
-        # conn = sqlite3.connect('C:\\Users\\vbahramian\\Desktop\\x-ui.db')
-        conn = sqlite3.connect('/home/vahid/x-ui.db')
-        cursor = conn.cursor()
         emails = GetAllEmail(cursor)
         username = query.from_user.username
         email = [dictionary[username] for dictionary in emails if username in dictionary]
@@ -74,9 +74,6 @@ def button_callback(update, context):
                     message += f"حجم مصرف شده:\n{traffic_used}/Unlimited"
                 context.bot.send_message(chat_id=query.message.chat_id, text=message)
     elif text == "account_renewal":
-        # conn = sqlite3.connect('/etc/x-ui/x-ui.db')
-        conn = sqlite3.connect('/home/vahid/x-ui.db')
-        cursor = conn.cursor()
         emails = GetAllEmail(cursor)
         username = query.from_user.username
         email = [dictionary[username] for dictionary in emails if username in dictionary]
@@ -88,10 +85,27 @@ def button_callback(update, context):
                 k = [InlineKeyboardButton( f"{e}", callback_data=f'us_account:{e}')]
                 keyboard.append(k)
             reply_markup = InlineKeyboardMarkup(keyboard)
-            context.bot.send_message(chat_id=query.message.chat_id, text="Your Account:", reply_markup=reply_markup)
+            query.edit_message_text(text="Your Account:", reply_markup=reply_markup)
     elif "us_account" in text:
         acc = text.split(":")[1]
-
+        keyboard = [
+            [InlineKeyboardButton("یک ماهه 50 گیگ: 120 هزار تومان", callback_data='tarrif_1')],
+            [InlineKeyboardButton("یک ماهه 100 گیگ: 200 هزار تومان", callback_data='tarrif_2')],
+            [InlineKeyboardButton("سه ماهه 100 گیگ: 300 هزار تومان", callback_data='tarrif_3')],
+            [InlineKeyboardButton("سه ماهه 300 گیگ: 750 هزار تومان", callback_data='tarrif_4')],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="تعرفه ها:", reply_markup=reply_markup)
+    elif "tarrif" in text:
+        index = text.split("_")[1]
+        if index == "1":
+            pass
+        elif index == "2":
+            pass
+        elif index == "3":
+            pass
+        elif index == "4":
+            pass
 
 def GetAllEmail(cursor):
     # Execute a SELECT query to fetch the desired column
