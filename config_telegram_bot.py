@@ -87,7 +87,7 @@ def button_callback(update, context):
             reply_markup = InlineKeyboardMarkup(keyboard)
             query.edit_message_text(text="Your Account:", reply_markup=reply_markup)
     elif "us_account" in text:
-        acc = text.split(":")[1]
+        context.user_data['account'] = text.split(":")[1]
         keyboard = [
             [InlineKeyboardButton("یک ماهه 50 گیگ: 120 هزار تومان", callback_data='tarrif_1')],
             [InlineKeyboardButton("یک ماهه 100 گیگ: 200 هزار تومان", callback_data='tarrif_2')],
@@ -98,14 +98,29 @@ def button_callback(update, context):
         query.edit_message_text(text="تعرفه ها:", reply_markup=reply_markup)
     elif "tarrif" in text:
         index = text.split("_")[1]
+        keyboard = [
+            [InlineKeyboardButton("بازگشت به صفحه اول", callback_data='main_page')],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        message = ""
         if index == "1":
-            pass
+            message = f"نام اکانت: {context.user_data.get('account')}\n \nنوع پلن: یک ماهه 50 گیگ\nقیمت پلن: 120 هزار تومان\nلطفا رسید پرداخت را به همراه نام اکانت به ایدی زیر ارسال کنید.\n\nاکانت پشتیبانی: @vpn7007_support"
         elif index == "2":
-            pass
+            message = f"نام اکانت: {context.user_data.get('account')}\n \nنوع پلن: یک ماهه 100 گیگ\nقیمت پلن: 200 هزار تومان\nلطفا رسید پرداخت را به همراه نام اکانت به ایدی زیر ارسال کنید.\n\nاکانت پشتیبانی: @vpn7007_support"
         elif index == "3":
-            pass
+            message = f"نام اکانت: {context.user_data.get('account')}\n \nنوع پلن: سه ماهه 100 گیگ\nقیمت پلن: 300 هزار تومان\nلطفا رسید پرداخت را به همراه نام اکانت به ایدی زیر ارسال کنید.\n\nاکانت پشتیبانی: @vpn7007_support"
         elif index == "4":
-            pass
+            message = f"نام اکانت: {context.user_data.get('account')}\n \nنوع پلن: سه ماهه 300 گیگ\nقیمت پلن: 750 هزار تومان\nلطفا رسید پرداخت را به همراه نام اکانت به ایدی زیر ارسال کنید.\n\nاکانت پشتیبانی: @vpn7007_support"
+        query.edit_message_text(text=message, reply_markup=reply_markup)
+        context.bot.send_message(chat_id=5969547680, text=message)
+    elif text == "main_page":
+        keyboard = [
+            [InlineKeyboardButton("تمدید اکانت", callback_data='account_renewal'),
+             InlineKeyboardButton("خرید اکانت جدید", callback_data='buy_account')],
+            [InlineKeyboardButton("بررسی حجم و زمان باقی مانده", callback_data='account_inquiry')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Press a button:", reply_markup=reply_markup)
 
 def GetAllEmail(cursor):
     # Execute a SELECT query to fetch the desired column
@@ -159,7 +174,7 @@ def GetExpireUser(cursor):
             now = time.time()
             if expiry_time > 0 and (expiry_time < (now + (86400 * 3)) * 1000):
                 remind_days = round(((expiry_time / 1000) - now) / 86400)
-                if email not in users:
+                if email not in users and remind_days != 0:
                     my_list.append(email)
                     with open(file_path, 'w') as file:
                         for string in my_list:
